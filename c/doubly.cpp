@@ -1,3 +1,5 @@
+//2024.05.24  이중 연결 리스트 코드 작성
+
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
