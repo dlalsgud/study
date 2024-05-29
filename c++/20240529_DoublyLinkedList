@@ -1,0 +1,189 @@
+// 2024.05.27 Partition 반복문 수정(루프 중간에 NULL 체크 추가)
+// 2024.05.28 left와 right가 교차할 때 교환이 필요하지 않은 경우 
+// 2024.05.29 FreeList 함수 작성
+
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+
+#include <crtdbg.h>
+
+#if _DEBUG
+#define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
+#define malloc(s) _malloc_dbg(s,_NORMAL_BLOCK,__FILE__,__LINE__)
+#endif
+
+typedef struct Node {
+    int data;
+    Node* prev;
+    Node* next;
+} Node;
+
+typedef struct LinkedList {
+    Node* head;
+    Node* tail;
+} LinkedList;
+
+LinkedList* Init()
+{
+    LinkedList* list = new LinkedList;
+    list->head = NULL;
+    list->tail = NULL;
+    return list;
+}
+
+void swap(int& a, int& b)
+{
+    int temp = a;
+    a = b;
+    b = temp;
+}
+
+Node* Partition(Node* low, Node* high)
+{
+    int pivot = low->data;
+
+    Node* left = low;
+    Node* right = high;
+
+    while (true)
+    {
+        while (left != NULL && left != high && left->data <= pivot)
+            left = left->next;
+        while (right != NULL && right != low && right->data > pivot)
+            right = right->prev;
+
+        if (left == NULL || right == NULL || left == right || left == right->next)
+            break;
+
+        swap(left->data, right->data);
+    }
+
+    swap(low->data, right->data);
+
+    return right;
+}
+
+void QuickSort(Node* low, Node* high)
+{
+    if (high != NULL && low != high && low != high->next)
+    {
+        Node* pivot = Partition(low, high);
+
+        if (pivot != NULL)
+        {
+            QuickSort(low, pivot->prev);
+            QuickSort(pivot->next, high);
+        }
+    }
+}
+
+void InsertNode(LinkedList* list, int value)
+{
+    Node* newNode = new Node;
+
+    newNode->data = value;
+    newNode->next = NULL;
+    newNode->prev = list->tail;
+
+    if (list->tail != NULL)
+        list->tail->next = newNode;
+    else
+        list->head = newNode;
+
+    list->tail = newNode;
+}
+
+void DeleteNode(LinkedList* list, int value)
+{
+    Node* delNode = list->head;
+    Node* ListTail = list->tail;
+
+    while (delNode != NULL)
+    {
+        if (delNode->data != value) {
+            delNode = delNode->next;
+            continue;
+        }
+        else if (delNode->data == value) {
+            del(delNode, ListTail);
+        }
+    }
+}
+
+void del(Node* delNode, Node* ListTail)
+{
+    Node* nextNode = NULL;
+    Node* tmp = delNode;
+
+    nextNode = delNode->next;
+
+    if (delNode->prev != NULL)
+        delNode->prev->next = delNode->next;
+    else
+        delNode = delNode->next;
+
+    if (delNode->next != NULL)
+        delNode->next->prev = delNode->prev;
+    else
+        ListTail = delNode->prev;
+
+    tmp = delNode;
+    delNode = nextNode;
+
+    delete tmp;
+    
+}
+
+void PrintList(LinkedList* list)
+{
+    Node* current = list->head;
+    while (current != NULL) {
+        std::cout << current->data << " -> ";
+        current = current->next;
+    }
+    std::cout << "NULL" << std::endl;
+}
+
+void FreeList(LinkedList* list)
+{
+Node* current = list->head;
+Node* next;
+
+while (current != NULL)
+{
+    next = current->next;
+    delete current;
+
+    current = next;
+}
+if (list != NULL) {
+    delete list;
+}
+
+}
+
+int main()
+{
+    LinkedList* list = Init();
+    srand(time(NULL));
+
+    for (int i = 0; i < 10; i++)
+    {
+        InsertNode(list, rand() % 10);
+    }
+
+    PrintList(list);
+
+
+    DeleteNode(list, 5);
+    PrintList(list);
+
+
+    QuickSort(list->head, list->tail);
+    PrintList(list);
+
+    _CrtDumpMemoryLeaks();
+
+    return 0;
+}
