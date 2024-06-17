@@ -1,0 +1,14 @@
+이름이 다른 컬럼에 값 넣기
+
+1. 테이블에 값이 있는지 없는지 확인
+     SELECT * FROM departments;  
+
+2. 값 복사
+    INSERT INTO departments (dept_num)
+    SELECT number
+    FROM departments_view;
+
+3. 여러 컬럼 값 복사
+    INSERT INTO departments (dept_num, dept_name, location)
+    SELECT number, name, loc
+    FROM departments_view;
